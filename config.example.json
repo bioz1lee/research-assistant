@@ -1,0 +1,39 @@
+{
+  "vault_path": "",
+  "vault_papers_subdir": "papers",
+  "telegram": {
+    "chat_id": "",
+    "enabled": false
+  },
+  "digest": {
+    "schedule": "08:00",
+    "timezone": "Asia/Seoul",
+    "keywords": {
+      "primary": [
+        "bioinformatics",
+        "single cell sequencing",
+        "single cell foundation model",
+        "spatial transcriptomics"
+      ],
+      "secondary": [
+        "scRNA-seq microglia",
+        "brain cell atlas",
+        "single-cell multiome"
+      ],
+      "methods_watch": [
+        "spatial transcriptomics methods",
+        "single-cell integration",
+        "trajectory inference"
+      ]
+    },
+    "sources": [
+      "biorxiv",
+      "pubmed"
+    ],
+    "max_results_per_keyword": 20
+  },
+  "llm": {
+    "model": "claude-opus-5",
+    "knowledge_file_max_chars": 8000
+  }
+}

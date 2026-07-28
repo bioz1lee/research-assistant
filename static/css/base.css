@@ -1,0 +1,966 @@
+/* ========================================================================
+   base.css — CSS 변수, reset, 타이포그래피, 스타필드 애니메이션
+   컨셉: 심야 마법성 + 크리스탈 왕관 + 달빛 무도회장
+   ======================================================================== */
+
+:root,
+:root[data-theme="dark"] {
+  /* 배경 — 심야 마법성 딥 네이비 */
+  --bg-deepest:     #020610;
+  --bg-base:        #060D1C;
+  --bg-surface:     #0B1828;
+  --bg-surface2:    #0F1E30;
+  --bg-glass:       rgba(6, 15, 35, 0.78);
+
+  /* 블루 — 다크 위에서 밝게 */
+  --blue-bright:    #A8D0F5;
+  --blue-mid:       #6AB0E0;
+  --blue-soft:      #48C0F0;
+  --blue-glow:      rgba(72, 192, 240, 0.28);
+
+  /* 포인트 — 아이스 화이트/실버 블루 */
+  --gold:           #B8DCF8;
+  --gold-bright:    #D8EEFF;
+  --gold-dim:       #3A5878;
+  --gold-glow:      rgba(155, 210, 255, 0.30);
+
+  /* 실버/화이트 */
+  --silver:         #88A8C8;
+  --silver-muted:   #526880;
+  --white-glow:     rgba(155, 210, 255, 0.08);
+
+  /* 악센트 */
+  --accent:         #48C0F0;
+  --accent-gold:    #B8DCF8;
+  --preprint:       #D49060;
+  --success:        #4AB880;
+  --error:          #E05858;
+  --warning:        #D4A040;
+
+  /* alias */
+  --bg:             var(--bg-base);
+  --surface:        var(--bg-surface);
+  --surface2:       var(--bg-surface2);
+  --border:         rgba(120, 180, 255, 0.12);
+  --border-strong:  rgba(150, 205, 255, 0.22);
+  --text:           #B8D4F0;
+  --text-muted:     var(--silver-muted);
+
+  /* 반투명 베일 (헤더/입력영역 배경) */
+  --bg-veil:        rgba(4, 10, 22, 0.68);
+  --bg-veil-strong: rgba(4, 10, 22, 0.80);
+}
+
+/* ── 데이라이트 무도회장 — 빛나는 사파이어 위 흰 꽃잎 (light) ── */
+:root[data-theme="light"] {
+  /* 배경 — 영롱한 사파이어 무도회장 */
+  --bg-deepest:     #5E8FCC;
+  --bg-base:        #88B2E4;
+  --bg-surface:     rgba(255, 255, 255, 0.80);
+  --bg-surface2:    rgba(255, 255, 255, 0.62);
+  --bg-glass:       rgba(255, 255, 255, 0.60);
+
+  /* 블루 — 밝은 배경 위에서 진하게 */
+  --blue-bright:    #16365E;
+  --blue-mid:       #1F5390;
+  --blue-soft:      #2A6FBF;
+  --blue-glow:      rgba(40, 100, 190, 0.22);
+
+  /* 포인트 — 딥 블루 잉크 */
+  --gold:           #BBD8F4;
+  --gold-bright:    #16487E;
+  --gold-dim:       #C6DCF2;
+  --gold-glow:      rgba(255, 255, 255, 0.45);
+
+  /* 실버/슬레이트 */
+  --silver:         #244A74;
+  --silver-muted:   #46658C;
+  --white-glow:     rgba(255, 255, 255, 0.18);
+
+  /* 악센트 */
+  --accent:         #2A6FBF;
+  --accent-gold:    #1F5390;
+  --preprint:       #A85E20;
+  --success:        #1E7A4C;
+  --error:          #B83838;
+  --warning:        #98680E;
+
+  /* alias */
+  --border:         rgba(255, 255, 255, 0.45);
+  --border-strong:  rgba(255, 255, 255, 0.70);
+  --text:           #1A3A60;
+  --text-muted:     var(--silver-muted);
+
+  --bg-veil:        rgba(255, 255, 255, 0.55);
+  --bg-veil-strong: rgba(255, 255, 255, 0.72);
+}
+
+/* Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Noto Sans KR",
+               "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text);
+  /* 영롱한 사파이어 무도회장 — 중앙 광채 + 상단 빛기둥 + 좌우/하단 심연 */
+  background:
+    radial-gradient(ellipse 72% 52% at 50% 40%,  rgba(50, 122, 232, 0.34) 0%, rgba(30, 84, 190, 0.17) 38%, transparent 68%),
+    radial-gradient(ellipse 60% 44% at 50% -3%,  rgba(96, 168, 255, 0.36) 0%, rgba(42, 102, 226, 0.17) 44%, transparent 72%),
+    radial-gradient(ellipse 52% 70% at -6% 50%,  rgba(24, 70, 182, 0.28) 0%, transparent 60%),
+    radial-gradient(ellipse 52% 70% at 106% 50%, rgba(20, 62, 172, 0.26) 0%, transparent 60%),
+    radial-gradient(ellipse 82% 50% at 50% 116%, rgba(8, 30, 100, 0.55) 0%, transparent 62%),
+    linear-gradient(172deg, #0A1A38 0%, #08152E 52%, #060F22 100%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 데이라이트 무도회장 — 창문 빛기둥 + 사파이어 심연 */
+:root[data-theme="light"] body {
+  background:
+    radial-gradient(ellipse 62% 48% at 50% -4%,  rgba(232, 244, 255, 0.92) 0%, rgba(200, 226, 250, 0.50) 40%, transparent 70%),
+    radial-gradient(ellipse 55% 62% at -8% 100%, rgba(74, 124, 196, 0.60) 0%, rgba(60, 105, 180, 0.20) 50%, transparent 72%),
+    radial-gradient(ellipse 55% 62% at 108% 100%, rgba(70, 118, 192, 0.58) 0%, rgba(58, 102, 178, 0.18) 50%, transparent 72%),
+    radial-gradient(ellipse 80% 50% at 50% 116%, rgba(50, 92, 168, 0.55) 0%, transparent 60%),
+    linear-gradient(172deg, #9CC0EC 0%, #82AEE2 52%, #6B9BD6 100%);
+  background-attachment: fixed;
+}
+
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+}
+
+a {
+  color: var(--blue-mid);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+a:hover { color: var(--blue-bright); }
+
+ul, ol { list-style: none; }
+
+/* ─── 타이포그래피 ───────────────────────────────────────── */
+
+h1, h2, h3, h4 {
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: -0.01em;
+  color: var(--silver);
+  font-weight: 600;
+}
+
+h1 { font-size: 22px; }
+h2 { font-size: 18px; }
+h3 { font-size: 16px; }
+h4 { font-size: 14px; }
+
+code, pre, .mono {
+  font-family: "SF Mono", "Fira Code", "Menlo", monospace;
+  font-size: 13px;
+}
+
+.serif-title {
+  font-family: Georgia, "Times New Roman", serif;
+  color: var(--blue-bright);
+}
+
+.uppercase-label {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 11px;
+  color: var(--silver-muted);
+  font-weight: 600;
+}
+
+/* ─── 달빛 무도회장 배경 장식 ────────────────────────── */
+
+#stars-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+/* 보케 orb 공통 */
+#stars-bg .bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* 왼쪽 위 대형 orb — 달빛 주광원 */
+#stars-bg::before {
+  content: "";
+  position: absolute;
+  width: 700px;
+  height: 700px;
+  top: -220px;
+  left: -160px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(42, 110, 235, 0.40) 0%, rgba(22, 68, 200, 0.18) 44%, transparent 70%);
+  animation: orb-drift-a 22s ease-in-out infinite;
+}
+
+/* 오른쪽 아래 대형 orb — 바닥 반사광 */
+#stars-bg::after {
+  content: "";
+  position: absolute;
+  width: 780px;
+  height: 780px;
+  bottom: -260px;
+  right: -200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(28, 90, 215, 0.32) 0%, rgba(14, 55, 180, 0.12) 44%, transparent 70%);
+  animation: orb-drift-b 28s ease-in-out infinite;
+  animation-delay: -10s;
+}
+
+/* 캔버스 — 흐르는 빛 리본 + 파티클 */
+#bg-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* 오른쪽 위 중형 orb */
+#stars-bg .bg-orb-tr {
+  width: 440px;
+  height: 440px;
+  top: -80px;
+  right: -100px;
+  background: radial-gradient(circle, rgba(48, 128, 240, 0.28) 0%, rgba(24, 82, 200, 0.10) 50%, transparent 72%);
+  animation: orb-drift-c 18s ease-in-out infinite;
+  animation-delay: -5s;
+}
+
+/* 왼쪽 아래 중형 orb */
+#stars-bg .bg-orb-bl {
+  width: 380px;
+  height: 380px;
+  bottom: -80px;
+  left: -60px;
+  background: radial-gradient(circle, rgba(36, 100, 225, 0.24) 0%, rgba(18, 62, 185, 0.08) 50%, transparent 72%);
+  animation: orb-drift-d 24s ease-in-out infinite;
+  animation-delay: -14s;
+}
+
+/* 크리스탈 반짝임 — 상들리에 빛 반사 */
+#stars-bg .bg-sparkles {
+  position: absolute;
+  inset: 0;
+}
+
+@keyframes orb-drift-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(45px, -30px) scale(1.06); }
+  66%      { transform: translate(-25px, 22px) scale(0.95); }
+}
+@keyframes orb-drift-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  40%      { transform: translate(-38px, 28px) scale(1.05); }
+  75%      { transform: translate(22px, -18px) scale(0.96); }
+}
+@keyframes orb-drift-c {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  45%      { transform: translate(-28px, 20px) scale(1.04); }
+  80%      { transform: translate(18px, -25px) scale(0.97); }
+}
+@keyframes orb-drift-d {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  38%      { transform: translate(32px, -22px) scale(1.05); }
+  72%      { transform: translate(-20px, 16px) scale(0.94); }
+}
+@keyframes sparkle-pulse-a {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+@keyframes sparkle-pulse-b {
+  0%, 100% { opacity: 0.45; }
+  50%      { opacity: 0.9; }
+}
+
+/* ─── 라이트 모드 — 배경 장식 보정 ─────────────────────── */
+
+:root[data-theme="light"] #stars-bg::before {
+  background: radial-gradient(circle, rgba(135, 180, 240, 0.38) 0%, rgba(160, 200, 245, 0.15) 44%, transparent 70%);
+}
+:root[data-theme="light"] #stars-bg::after {
+  background: radial-gradient(circle, rgba(150, 195, 245, 0.32) 0%, rgba(170, 205, 245, 0.12) 44%, transparent 70%);
+}
+:root[data-theme="light"] #stars-bg .bg-orb-tr {
+  background: radial-gradient(circle, rgba(145, 190, 245, 0.30) 0%, rgba(170, 205, 245, 0.10) 50%, transparent 72%);
+}
+:root[data-theme="light"] #stars-bg .bg-orb-bl {
+  background: radial-gradient(circle, rgba(155, 198, 245, 0.26) 0%, rgba(175, 208, 245, 0.08) 50%, transparent 72%);
+}
+
+/* 라이트 모드 — 흰 꽃잎/리본/반짝임을 사파이어 위에 그대로 살림.
+   하단 짙은 영역에서 빛나고, 상단 빛기둥에선 자연스럽게 옅어짐 */
+:root[data-theme="light"] #bg-canvas {
+  opacity: 0.92;
+}
+
+/* ─── 코너 플로럴 장식 ──────────────────────────────────── */
+
+.corner-fl {
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  pointer-events: none;
+  opacity: 0.90;
+  animation: corner-breathe 14s ease-in-out infinite;
+}
+.corner-fl-tl {
+  top: 0; left: 0;
+}
+.corner-fl-tr {
+  top: 0; right: 0;
+  transform: scaleX(-1);
+  transform-origin: right top;
+}
+.corner-fl-bl {
+  bottom: 0; left: 0;
+  transform: scaleY(-1);
+  transform-origin: left bottom;
+}
+.corner-fl-br {
+  bottom: 0; right: 0;
+  transform: scale(-1, -1);
+  transform-origin: right bottom;
+}
+
+@keyframes corner-breathe {
+  0%, 100% { opacity: 0.90; }
+  50%      { opacity: 0.60; }
+}
+
+/* ─── 하단 장미 장식 ────────────────────────────────────── */
+
+.bottom-rose {
+  position: absolute;
+  width: 200px;
+  height: 250px;
+  pointer-events: none;
+  opacity: 0.20;
+  animation: fl-sway 10s ease-in-out infinite;
+}
+.bottom-rose-l {
+  bottom: -60px;
+  left: 55px;
+  animation-delay: 0s;
+}
+.bottom-rose-r {
+  bottom: -60px;
+  right: 55px;
+  transform: scaleX(-1);
+  animation-delay: -5s;
+}
+
+@keyframes fl-sway {
+  0%, 100% { transform: translateX(0)  rotate(0deg);  opacity: 0.20; }
+  33%      { transform: translateX(5px) rotate(1.2deg); opacity: 0.24; }
+  66%      { transform: translateX(-4px) rotate(-0.9deg); opacity: 0.18; }
+}
+/* right rose needs scaleX(-1) preserved during sway */
+.bottom-rose-r {
+  animation-name: fl-sway-r;
+}
+@keyframes fl-sway-r {
+  0%, 100% { transform: scaleX(-1) translateX(0)  rotate(0deg);  opacity: 0.20; }
+  33%      { transform: scaleX(-1) translateX(5px) rotate(1.2deg); opacity: 0.24; }
+  66%      { transform: scaleX(-1) translateX(-4px) rotate(-0.9deg); opacity: 0.18; }
+}
+
+/* ─── 글래스모피즘 ─────────────────────────────────────── */
+
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid var(--border);
+  box-shadow:
+    0 4px 24px rgba(2, 8, 25, 0.60),
+    inset 0 1px 0 rgba(160, 220, 255, 0.08);
+}
+
+.gold-glow {
+  border: 1px solid rgba(160, 215, 255, 0.38);
+  box-shadow:
+    0 0 12px rgba(100, 180, 255, 0.28),
+    0 0 24px rgba(60, 130, 255, 0.12);
+}
+
+:root[data-theme="light"] .glass {
+  box-shadow:
+    0 4px 18px rgba(60, 115, 195, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.90);
+}
+
+:root[data-theme="light"] .gold-glow {
+  border-color: rgba(90, 150, 220, 0.50);
+  box-shadow:
+    0 0 12px rgba(90, 150, 220, 0.18),
+    0 0 24px rgba(120, 170, 230, 0.10);
+}
+
+/* ─── 스크롤바 ──────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(30, 111, 168, 0.45);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(30, 111, 168, 0.65);
+}
+:root[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(42, 111, 191, 0.35);
+}
+:root[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(42, 111, 191, 0.55);
+}
+
+/* ─── 버튼 ──────────────────────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.18s ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #2278BA, #1868A0);
+  border: 1px solid #1868A0;
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px var(--blue-glow);
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, #1868A0, #145888);
+  box-shadow: 0 4px 14px rgba(72, 192, 240, 0.32);
+  border-color: #145888;
+  transform: translateY(-1px);
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, #2055B8, #184298);
+  border: 1px solid #2055B8;
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px var(--gold-glow);
+}
+.btn-gold:hover {
+  background: linear-gradient(135deg, #184298, #133280);
+  box-shadow: 0 4px 14px rgba(155, 210, 255, 0.28);
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--silver-muted);
+}
+.btn-ghost:hover {
+  color: var(--blue-mid);
+  background: var(--white-glow);
+}
+
+.btn-danger {
+  background: rgba(185, 28, 28, 0.10);
+  border: 1px solid rgba(185, 28, 28, 0.45);
+  color: var(--error);
+}
+.btn-danger:hover {
+  background: rgba(185, 28, 28, 0.20);
+}
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+/* ─── 인풋 ──────────────────────────────────────────────── */
+
+.input,
+input[type="text"],
+input[type="search"],
+input[type="url"],
+textarea,
+select {
+  background: var(--bg-surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text);
+  outline: none;
+  transition: all 0.18s;
+  font-size: 13px;
+  width: 100%;
+}
+.input:focus,
+input[type="text"]:focus,
+input[type="search"]:focus,
+input[type="url"]:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--blue-mid);
+  box-shadow: 0 0 0 3px var(--blue-glow);
+  background: var(--bg-surface);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231E6FA8' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+}
+
+/* ─── 배지 ──────────────────────────────────────────────── */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+.badge-preprint {
+  background: rgba(154, 79, 24, 0.10);
+  color: var(--preprint);
+  border: 1px solid rgba(154, 79, 24, 0.35);
+}
+
+.badge-gold {
+  background: rgba(155, 210, 255, 0.10);
+  color: var(--gold-bright);
+  border: 1px solid rgba(155, 210, 255, 0.30);
+}
+
+.badge-blue {
+  background: rgba(106, 176, 224, 0.12);
+  color: var(--blue-mid);
+  border: 1px solid rgba(106, 176, 224, 0.30);
+}
+
+.badge-ai {
+  background: rgba(30, 111, 168, 0.08);
+  color: var(--blue-mid);
+  border: 1px dashed rgba(30, 111, 168, 0.40);
+  font-style: italic;
+}
+
+.badge-enriching {
+  background: rgba(106, 176, 224, 0.12);
+  color: var(--blue-mid);
+  border: 1px solid rgba(106, 176, 224, 0.30);
+  text-transform: none;
+}
+
+.badge-enrich-failed {
+  background: rgba(192, 57, 43, 0.10);
+  color: #c0392b;
+  border: 1px solid rgba(192, 57, 43, 0.35);
+  text-transform: none;
+  cursor: help;
+}
+
+/* ─── 전역 검색 모달 (Cmd+K) ───────────────────────────── */
+
+.search-modal {
+  width: min(640px, 92vw);
+  padding: 0;
+  overflow: hidden;
+  align-self: flex-start;
+  margin-top: 12vh;
+}
+
+.search-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(44, 74, 110, 0.15);
+}
+
+.search-input-icon { font-size: 16px; opacity: 0.5; }
+
+.search-input-wrap input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 15px;
+  color: inherit;
+}
+
+.search-input-hint { font-size: 11px; opacity: 0.45; white-space: nowrap; }
+
+.search-results {
+  max-height: 50vh;
+  overflow-y: auto;
+  padding: 6px 0 10px;
+}
+
+.search-empty {
+  padding: 28px 16px;
+  text-align: center;
+  font-size: 13px;
+  opacity: 0.55;
+}
+
+.search-group-label {
+  padding: 10px 16px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+.search-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+}
+
+.search-item.active {
+  background: rgba(106, 176, 224, 0.12);
+  border-left-color: var(--blue-mid, #4a90c2);
+}
+
+.search-item-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-item-snippet {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-item-snippet mark {
+  background: rgba(155, 210, 255, 0.45);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+/* ─── 태그 pill ─────────────────────────────────────────── */
+
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 10px;
+  font-size: 11px;
+  border-radius: 11px;
+  background: rgba(30, 111, 168, 0.10);
+  border: 1px solid rgba(30, 111, 168, 0.30);
+  color: var(--blue-mid);
+  cursor: pointer;
+  transition: all 0.18s;
+  white-space: nowrap;
+}
+.tag-pill:hover {
+  background: rgba(30, 58, 138, 0.10);
+  border-color: var(--gold);
+  color: var(--gold-bright);
+  box-shadow: 0 0 8px var(--gold-glow);
+}
+.tag-pill.removable::after {
+  content: "×";
+  margin-left: 4px;
+  opacity: 0.6;
+}
+
+/* ─── Toast ─────────────────────────────────────────────── */
+
+#toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  box-shadow: 0 4px 20px rgba(44, 74, 110, 0.12), 0 0 12px var(--blue-glow);
+  min-width: 220px;
+  max-width: 380px;
+  pointer-events: auto;
+  animation: toast-in 0.25s ease-out;
+}
+.toast.fade-out {
+  animation: toast-out 0.25s ease-in forwards;
+}
+.toast.success { border-color: rgba(17, 122, 56, 0.45); box-shadow: 0 4px 20px rgba(44, 74, 110, 0.12), 0 0 12px rgba(17, 122, 56, 0.20); }
+.toast.error { border-color: rgba(185, 28, 28, 0.45); box-shadow: 0 4px 20px rgba(44, 74, 110, 0.12), 0 0 12px rgba(185, 28, 28, 0.20); }
+.toast.info { border-color: var(--border-strong); }
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes toast-out {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(8px); }
+}
+
+/* ─── Modal ─────────────────────────────────────────────── */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(44, 74, 110, 0.30);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fade-in 0.2s;
+}
+.modal-overlay.hidden { display: none; }
+
+.modal {
+  background: var(--bg-surface);
+  border: 1px solid var(--gold);
+  border-radius: 14px;
+  width: 92%;
+  max-width: 520px;
+  max-height: 86vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 24px 60px rgba(2, 6, 20, 0.65),
+    0 0 24px var(--gold-glow),
+    inset 0 1px 0 rgba(160, 220, 255, 0.06);
+  overflow: hidden;
+}
+
+:root[data-theme="light"] .modal-overlay {
+  background: rgba(105, 145, 195, 0.28);
+}
+:root[data-theme="light"] .modal {
+  box-shadow:
+    0 24px 60px rgba(70, 120, 190, 0.28),
+    0 0 24px var(--gold-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.90);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-header h2 {
+  font-size: 16px;
+  color: var(--gold-bright);
+}
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.modal-close-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--silver-muted);
+}
+.modal-close-btn:hover {
+  background: var(--white-glow);
+  color: var(--text);
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ─── Hidden / Utility ──────────────────────────────────── */
+
+.hidden { display: none !important; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-1 { flex: 1; min-width: 0; min-height: 0; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 12px; }
+.mt-4 { margin-top: 16px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 12px; }
+.text-muted { color: var(--silver-muted); }
+.text-gold { color: var(--gold-bright); }
+.text-blue { color: var(--blue-bright); }
+.text-xs { font-size: 11px; }
+.text-sm { font-size: 12px; }
+
+/* ─── Loading skeleton / pulse ──────────────────────────── */
+
+.skeleton {
+  background: linear-gradient(90deg,
+    rgba(44, 74, 110, 0.06) 0%,
+    rgba(44, 74, 110, 0.12) 50%,
+    rgba(44, 74, 110, 0.06) 100%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+  border-radius: 4px;
+}
+@keyframes skeleton-pulse {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.pulse-dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--blue-bright);
+  box-shadow: 0 0 8px var(--blue-glow);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+
+/* ─── Empty State ───────────────────────────────────────── */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 30px;
+  text-align: center;
+  color: var(--silver-muted);
+  gap: 12px;
+  height: 100%;
+}
+.empty-state-icon {
+  font-size: 36px;
+  color: var(--gold);
+  opacity: 0.6;
+  text-shadow: 0 0 20px var(--gold-glow);
+}
+.empty-state-title {
+  font-family: Georgia, serif;
+  font-size: 18px;
+  color: var(--blue-bright);
+}
+.empty-state-msg {
+  font-size: 13px;
+  max-width: 380px;
+  line-height: 1.6;
+}
+
+/* ─── Section heading ────────────────────────────────────── */
+
+.section-title {
+  font-family: Georgia, serif;
+  font-size: 20px;
+  color: var(--blue-bright);
+  letter-spacing: -0.01em;
+}
+
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(44, 74, 110, 0.14) 20%,
+    rgba(30, 58, 138, 0.22) 50%,
+    rgba(44, 74, 110, 0.14) 80%,
+    transparent 100%);
+  margin: 16px 0;
+}
+
+/* svg icon helper */
+.icon { width: 16px; height: 16px; flex-shrink: 0; }

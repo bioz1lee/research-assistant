@@ -1,0 +1,25 @@
+#!/bin/bash
+PORT=8321
+SERVER_DIR="/Users/jiwonlee/research-assistant"
+PYTHON="/Users/jiwonlee/micromamba/envs/main/bin/python3"
+
+# GUI(.app)는 셸 PATH를 상속받지 못한다. claude CLI와 보조 도구(git 등) 경로 보강.
+export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+# 서버가 이미 실행 중인지 확인
+if ! lsof -i :$PORT -sTCP:LISTEN -t > /dev/null 2>&1; then
+    # 서버 시작 (백그라운드, 새 터미널 없이)
+    cd "$SERVER_DIR"
+    nohup "$PYTHON" server.py > "$SERVER_DIR/launcher.log" 2>&1 &
+
+    # 서버 준비 대기 (최대 8초)
+    for i in $(seq 1 16); do
+        sleep 0.5
+        if lsof -i :$PORT -sTCP:LISTEN -t > /dev/null 2>&1; then
+            break
+        fi
+    done
+fi
+
+# 브라우저 오픈
+open "http://localhost:$PORT"

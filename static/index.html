@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Research Assistant</title>
+  <script>
+    document.documentElement.setAttribute(
+      "data-theme",
+      localStorage.getItem("ra-theme") || "dark"
+    );
+  </script>
+  <link rel="stylesheet" href="/static/css/base.css" />
+  <link rel="stylesheet" href="/static/css/layout.css" />
+  <link rel="stylesheet" href="/static/css/chat.css" />
+  <link rel="stylesheet" href="/static/css/wiki.css" />
+  <link rel="stylesheet" href="/static/css/projects.css" />
+  <link rel="stylesheet" href="/static/css/study.css" />
+  <link rel="stylesheet" href="/static/css/digest.css" />
+  <!-- KaTeX: LaTeX 수식 렌더링 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <!-- 달빛 무도회장 배경 레이어 -->
+  <div id="stars-bg">
+    <canvas id="bg-canvas"></canvas>
+    <div class="bg-orb bg-orb-tr"></div>
+    <div class="bg-orb bg-orb-bl"></div>
+    <div class="bg-sparkles"></div>
+
+    <!-- 코너 꽃 장식 -->
+    <svg class="corner-fl corner-fl-tl" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <line x1="18" y1="7" x2="138" y2="7" stroke="rgba(185,228,255,0.22)" stroke-width="0.8"/>
+      <line x1="7" y1="18" x2="7" y2="138" stroke="rgba(185,228,255,0.22)" stroke-width="0.8"/>
+      <line x1="22" y1="14" x2="118" y2="14" stroke="rgba(185,228,255,0.10)" stroke-width="0.45"/>
+      <line x1="14" y1="22" x2="14" y2="118" stroke="rgba(185,228,255,0.10)" stroke-width="0.45"/>
+      <path d="M 25 7 C 36 3 47 10 58 6 C 69 2 80 10 91 6 C 102 2 113 9 122 6" stroke="rgba(175,220,255,0.22)" stroke-width="0.8" stroke-linecap="round"/>
+      <path d="M 7 25 C 3 36 10 47 6 58 C 2 69 10 80 6 91 C 2 102 9 113 6 122" stroke="rgba(175,220,255,0.22)" stroke-width="0.8" stroke-linecap="round"/>
+      <!-- Corner flower (7,7) — large, partly clipped by SVG boundary = rose-from-corner effect -->
+      <g transform="translate(7,7)">
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5"/>
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="3.6" fill="rgba(235,250,255,0.86)"/>
+        <circle cx="0" cy="0" r="1.6" fill="rgba(255,255,255,0.95)"/>
+      </g>
+      <!-- End-of-line flower horizontal (122,7) -->
+      <g transform="translate(122,7)">
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="2.7" fill="rgba(235,250,255,0.83)"/>
+        <circle cx="0" cy="0" r="1.2" fill="rgba(255,255,255,0.92)"/>
+      </g>
+      <!-- End-of-line flower vertical (7,122) -->
+      <g transform="translate(7,122)">
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="2.7" fill="rgba(235,250,255,0.83)"/>
+        <circle cx="0" cy="0" r="1.2" fill="rgba(255,255,255,0.92)"/>
+      </g>
+      <!-- Mid-guide flower (58,7) -->
+      <g transform="translate(58,7)">
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="1.8" fill="rgba(228,248,255,0.78)"/>
+      </g>
+      <!-- Mid-guide flower (91,7) -->
+      <g transform="translate(91,7)">
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="1.8" fill="rgba(225,246,255,0.74)"/>
+      </g>
+      <!-- Mid-guide flower (7,58) -->
+      <g transform="translate(7,58)">
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="1.8" fill="rgba(228,248,255,0.78)"/>
+      </g>
+      <!-- Mid-guide flower (7,91) -->
+      <g transform="translate(7,91)">
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="1.8" fill="rgba(225,246,255,0.74)"/>
+      </g>
+      <!-- Inner accent flowers -->
+      <g transform="translate(35,35)">
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)"/>
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="1.2" fill="rgba(220,245,255,0.70)"/>
+      </g>
+      <g transform="translate(55,40)">
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)"/>
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="0.82" fill="rgba(215,242,255,0.62)"/>
+      </g>
+      <circle cx="78" cy="60" r="1.1" fill="rgba(200,238,255,0.28)"/>
+      <circle cx="44" cy="53" r="0.85" fill="rgba(200,238,255,0.22)"/>
+    </svg>
+    <svg class="corner-fl corner-fl-tr" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <line x1="18" y1="7" x2="138" y2="7" stroke="rgba(185,228,255,0.22)" stroke-width="0.8"/>
+      <line x1="7" y1="18" x2="7" y2="138" stroke="rgba(185,228,255,0.22)" stroke-width="0.8"/>
+      <line x1="22" y1="14" x2="118" y2="14" stroke="rgba(185,228,255,0.10)" stroke-width="0.45"/>
+      <line x1="14" y1="22" x2="14" y2="118" stroke="rgba(185,228,255,0.10)" stroke-width="0.45"/>
+      <path d="M 25 7 C 36 3 47 10 58 6 C 69 2 80 10 91 6 C 102 2 113 9 122 6" stroke="rgba(175,220,255,0.22)" stroke-width="0.8" stroke-linecap="round"/>
+      <path d="M 7 25 C 3 36 10 47 6 58 C 2 69 10 80 6 91 C 2 102 9 113 6 122" stroke="rgba(175,220,255,0.22)" stroke-width="0.8" stroke-linecap="round"/>
+      <!-- Corner flower (7,7) — large, partly clipped by SVG boundary = rose-from-corner effect -->
+      <g transform="translate(7,7)">
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5"/>
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="3.6" fill="rgba(235,250,255,0.86)"/>
+        <circle cx="0" cy="0" r="1.6" fill="rgba(255,255,255,0.95)"/>
+      </g>
+      <!-- End-of-line flower horizontal (122,7) -->
+      <g transform="translate(122,7)">
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="2.7" fill="rgba(235,250,255,0.83)"/>
+        <circle cx="0" cy="0" r="1.2" fill="rgba(255,255,255,0.92)"/>
+      </g>
+      <!-- End-of-line flower vertical (7,122) -->
+      <g transform="translate(7,122)">
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="2.7" fill="rgba(235,250,255,0.83)"/>
+        <circle cx="0" cy="0" r="1.2" fill="rgba(255,255,255,0.92)"/>
+      </g>
+      <!-- Mid-guide flower (58,7) -->
+      <g transform="translate(58,7)">
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="1.8" fill="rgba(228,248,255,0.78)"/>
+      </g>
+      <!-- Mid-guide flower (91,7) -->
+      <g transform="translate(91,7)">
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="1.8" fill="rgba(225,246,255,0.74)"/>
+      </g>
+      <!-- Mid-guide flower (7,58) -->
+      <g transform="translate(7,58)">
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="1.8" fill="rgba(228,248,255,0.78)"/>
+      </g>
+      <!-- Mid-guide flower (7,91) -->
+      <g transform="translate(7,91)">
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="1.8" fill="rgba(225,246,255,0.74)"/>
+      </g>
+      <!-- Inner accent flowers -->
+      <g transform="translate(35,35)">
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)"/>
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="1.2" fill="rgba(220,245,255,0.70)"/>
+      </g>
+      <g transform="translate(55,40)">
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)"/>
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="0.82" fill="rgba(215,242,255,0.62)"/>
+      </g>
+      <circle cx="78" cy="60" r="1.1" fill="rgba(200,238,255,0.28)"/>
+      <circle cx="44" cy="53" r="0.85" fill="rgba(200,238,255,0.22)"/>
+    </svg>
+    <svg class="corner-fl corner-fl-bl" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <line x1="18" y1="7" x2="138" y2="7" stroke="rgba(185,228,255,0.22)" stroke-width="0.8"/>
+      <line x1="7" y1="18" x2="7" y2="138" stroke="rgba(185,228,255,0.22)" stroke-width="0.8"/>
+      <line x1="22" y1="14" x2="118" y2="14" stroke="rgba(185,228,255,0.10)" stroke-width="0.45"/>
+      <line x1="14" y1="22" x2="14" y2="118" stroke="rgba(185,228,255,0.10)" stroke-width="0.45"/>
+      <path d="M 25 7 C 36 3 47 10 58 6 C 69 2 80 10 91 6 C 102 2 113 9 122 6" stroke="rgba(175,220,255,0.22)" stroke-width="0.8" stroke-linecap="round"/>
+      <path d="M 7 25 C 3 36 10 47 6 58 C 2 69 10 80 6 91 C 2 102 9 113 6 122" stroke="rgba(175,220,255,0.22)" stroke-width="0.8" stroke-linecap="round"/>
+      <!-- Corner flower (7,7) — large, partly clipped by SVG boundary = rose-from-corner effect -->
+      <g transform="translate(7,7)">
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5"/>
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="3.6" fill="rgba(235,250,255,0.86)"/>
+        <circle cx="0" cy="0" r="1.6" fill="rgba(255,255,255,0.95)"/>
+      </g>
+      <!-- End-of-line flower horizontal (122,7) -->
+      <g transform="translate(122,7)">
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="2.7" fill="rgba(235,250,255,0.83)"/>
+        <circle cx="0" cy="0" r="1.2" fill="rgba(255,255,255,0.92)"/>
+      </g>
+      <!-- End-of-line flower vertical (7,122) -->
+      <g transform="translate(7,122)">
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="2.7" fill="rgba(235,250,255,0.83)"/>
+        <circle cx="0" cy="0" r="1.2" fill="rgba(255,255,255,0.92)"/>
+      </g>
+      <!-- Mid-guide flower (58,7) -->
+      <g transform="translate(58,7)">
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="1.8" fill="rgba(228,248,255,0.78)"/>
+      </g>
+      <!-- Mid-guide flower (91,7) -->
+      <g transform="translate(91,7)">
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="1.8" fill="rgba(225,246,255,0.74)"/>
+      </g>
+      <!-- Mid-guide flower (7,58) -->
+      <g transform="translate(7,58)">
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="1.8" fill="rgba(228,248,255,0.78)"/>
+      </g>
+      <!-- Mid-guide flower (7,91) -->
+      <g transform="translate(7,91)">
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="1.8" fill="rgba(225,246,255,0.74)"/>
+      </g>
+      <!-- Inner accent flowers -->
+      <g transform="translate(35,35)">
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)"/>
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="1.2" fill="rgba(220,245,255,0.70)"/>
+      </g>
+      <g transform="translate(55,40)">
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)"/>
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="0.82" fill="rgba(215,242,255,0.62)"/>
+      </g>
+      <circle cx="78" cy="60" r="1.1" fill="rgba(200,238,255,0.28)"/>
+      <circle cx="44" cy="53" r="0.85" fill="rgba(200,238,255,0.22)"/>
+    </svg>
+    <svg class="corner-fl corner-fl-br" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <line x1="18" y1="7" x2="138" y2="7" stroke="rgba(185,228,255,0.22)" stroke-width="0.8"/>
+      <line x1="7" y1="18" x2="7" y2="138" stroke="rgba(185,228,255,0.22)" stroke-width="0.8"/>
+      <line x1="22" y1="14" x2="118" y2="14" stroke="rgba(185,228,255,0.10)" stroke-width="0.45"/>
+      <line x1="14" y1="22" x2="14" y2="118" stroke="rgba(185,228,255,0.10)" stroke-width="0.45"/>
+      <path d="M 25 7 C 36 3 47 10 58 6 C 69 2 80 10 91 6 C 102 2 113 9 122 6" stroke="rgba(175,220,255,0.22)" stroke-width="0.8" stroke-linecap="round"/>
+      <path d="M 7 25 C 3 36 10 47 6 58 C 2 69 10 80 6 91 C 2 102 9 113 6 122" stroke="rgba(175,220,255,0.22)" stroke-width="0.8" stroke-linecap="round"/>
+      <!-- Corner flower (7,7) — large, partly clipped by SVG boundary = rose-from-corner effect -->
+      <g transform="translate(7,7)">
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5"/>
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-8" rx="3.6" ry="8" fill="rgba(215,242,255,0.62)" stroke="rgba(192,228,255,0.38)" stroke-width="0.5" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="3.6" fill="rgba(235,250,255,0.86)"/>
+        <circle cx="0" cy="0" r="1.6" fill="rgba(255,255,255,0.95)"/>
+      </g>
+      <!-- End-of-line flower horizontal (122,7) -->
+      <g transform="translate(122,7)">
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="2.7" fill="rgba(235,250,255,0.83)"/>
+        <circle cx="0" cy="0" r="1.2" fill="rgba(255,255,255,0.92)"/>
+      </g>
+      <!-- End-of-line flower vertical (7,122) -->
+      <g transform="translate(7,122)">
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-6" rx="2.7" ry="6" fill="rgba(208,238,255,0.56)" stroke="rgba(185,222,255,0.28)" stroke-width="0.45" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="2.7" fill="rgba(235,250,255,0.83)"/>
+        <circle cx="0" cy="0" r="1.2" fill="rgba(255,255,255,0.92)"/>
+      </g>
+      <!-- Mid-guide flower (58,7) -->
+      <g transform="translate(58,7)">
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="1.8" fill="rgba(228,248,255,0.78)"/>
+      </g>
+      <!-- Mid-guide flower (91,7) -->
+      <g transform="translate(91,7)">
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="1.8" fill="rgba(225,246,255,0.74)"/>
+      </g>
+      <!-- Mid-guide flower (7,58) -->
+      <g transform="translate(7,58)">
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.48)" stroke="rgba(180,218,255,0.20)" stroke-width="0.35" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="1.8" fill="rgba(228,248,255,0.78)"/>
+      </g>
+      <!-- Mid-guide flower (7,91) -->
+      <g transform="translate(7,91)">
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-4" rx="1.8" ry="4" fill="rgba(200,235,255,0.40)" stroke="rgba(180,218,255,0.16)" stroke-width="0.35" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="1.8" fill="rgba(225,246,255,0.74)"/>
+      </g>
+      <!-- Inner accent flowers -->
+      <g transform="translate(35,35)">
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)"/>
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-2.6" rx="1.2" ry="2.6" fill="rgba(195,232,255,0.34)" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="1.2" fill="rgba(220,245,255,0.70)"/>
+      </g>
+      <g transform="translate(55,40)">
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)"/>
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-1.8" rx="0.82" ry="1.8" fill="rgba(192,230,255,0.28)" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="0.82" fill="rgba(215,242,255,0.62)"/>
+      </g>
+      <circle cx="78" cy="60" r="1.1" fill="rgba(200,238,255,0.28)"/>
+      <circle cx="44" cy="53" r="0.85" fill="rgba(200,238,255,0.22)"/>
+    </svg>
+
+    <!-- 하단 대형 장미 장식 -->
+    <svg class="bottom-rose bottom-rose-l" viewBox="0 0 200 250" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="65" cy="232" rx="14" ry="30" fill="rgba(148,205,255,0.11)" stroke="rgba(168,215,255,0.15)" stroke-width="0.8" transform="rotate(-38,65,232)"/>
+      <ellipse cx="140" cy="228" rx="12" ry="25" fill="rgba(148,205,255,0.10)" stroke="rgba(168,215,255,0.13)" stroke-width="0.7" transform="rotate(42,140,228)"/>
+      <ellipse cx="100" cy="198" rx="10" ry="22" fill="rgba(192,232,255,0.17)" transform="rotate(0,100,220)"/>
+      <ellipse cx="100" cy="198" rx="10" ry="22" fill="rgba(190,230,255,0.14)" transform="rotate(45,100,220)"/>
+      <ellipse cx="100" cy="198" rx="10" ry="22" fill="rgba(190,230,255,0.14)" transform="rotate(90,100,220)"/>
+      <ellipse cx="100" cy="198" rx="10" ry="22" fill="rgba(190,230,255,0.14)" transform="rotate(135,100,220)"/>
+      <ellipse cx="100" cy="198" rx="10" ry="22" fill="rgba(190,230,255,0.14)" transform="rotate(180,100,220)"/>
+      <ellipse cx="100" cy="198" rx="10" ry="22" fill="rgba(190,230,255,0.14)" transform="rotate(225,100,220)"/>
+      <ellipse cx="100" cy="198" rx="10" ry="22" fill="rgba(190,230,255,0.14)" transform="rotate(270,100,220)"/>
+      <ellipse cx="100" cy="198" rx="10" ry="22" fill="rgba(190,230,255,0.14)" transform="rotate(315,100,220)"/>
+      <ellipse cx="100" cy="205" rx="8" ry="14" fill="rgba(200,238,255,0.20)" transform="rotate(22.5,100,220)"/>
+      <ellipse cx="100" cy="205" rx="8" ry="14" fill="rgba(200,238,255,0.18)" transform="rotate(94.5,100,220)"/>
+      <ellipse cx="100" cy="205" rx="8" ry="14" fill="rgba(200,238,255,0.18)" transform="rotate(166.5,100,220)"/>
+      <ellipse cx="100" cy="205" rx="8" ry="14" fill="rgba(200,238,255,0.18)" transform="rotate(238.5,100,220)"/>
+      <ellipse cx="100" cy="205" rx="8" ry="14" fill="rgba(200,238,255,0.18)" transform="rotate(310.5,100,220)"/>
+      <ellipse cx="100" cy="211" rx="6" ry="9" fill="rgba(210,240,255,0.25)" transform="rotate(0,100,220)"/>
+      <ellipse cx="100" cy="211" rx="6" ry="9" fill="rgba(210,240,255,0.22)" transform="rotate(72,100,220)"/>
+      <ellipse cx="100" cy="211" rx="6" ry="9" fill="rgba(210,240,255,0.22)" transform="rotate(144,100,220)"/>
+      <ellipse cx="100" cy="211" rx="6" ry="9" fill="rgba(210,240,255,0.22)" transform="rotate(216,100,220)"/>
+      <ellipse cx="100" cy="211" rx="6" ry="9" fill="rgba(210,240,255,0.22)" transform="rotate(288,100,220)"/>
+      <circle cx="100" cy="220" r="7" fill="rgba(218,244,255,0.22)"/>
+      <circle cx="100" cy="220" r="3.5" fill="rgba(235,250,255,0.32)"/>
+      <ellipse cx="35" cy="234" rx="7" ry="12" fill="rgba(185,225,255,0.13)" transform="rotate(0,35,248)"/>
+      <ellipse cx="35" cy="234" rx="7" ry="12" fill="rgba(183,222,255,0.11)" transform="rotate(72,35,248)"/>
+      <ellipse cx="35" cy="234" rx="7" ry="12" fill="rgba(183,222,255,0.11)" transform="rotate(144,35,248)"/>
+      <ellipse cx="35" cy="234" rx="7" ry="12" fill="rgba(183,222,255,0.11)" transform="rotate(216,35,248)"/>
+      <ellipse cx="35" cy="234" rx="7" ry="12" fill="rgba(183,222,255,0.11)" transform="rotate(288,35,248)"/>
+      <circle cx="35" cy="248" r="4" fill="rgba(210,238,255,0.18)"/>
+    </svg>
+    <svg class="bottom-rose bottom-rose-r" viewBox="0 0 200 250" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="65" cy="232" rx="14" ry="30" fill="rgba(148,205,255,0.11)" stroke="rgba(168,215,255,0.15)" stroke-width="0.8" transform="rotate(-38,65,232)"/>
+      <ellipse cx="140" cy="228" rx="12" ry="25" fill="rgba(148,205,255,0.10)" stroke="rgba(168,215,255,0.13)" stroke-width="0.7" transform="rotate(42,140,228)"/>
+      <ellipse cx="100" cy="198" rx="10" ry="22" fill="rgba(192,232,255,0.17)" transform="rotate(0,100,220)"/>
+      <ellipse cx="100" cy="198" rx="10" ry="22" fill="rgba(190,230,255,0.14)" transform="rotate(45,100,220)"/>
+      <ellipse cx="100" cy="198" rx="10" ry="22" fill="rgba(190,230,255,0.14)" transform="rotate(90,100,220)"/>
+      <ellipse cx="100" cy="198" rx="10" ry="22" fill="rgba(190,230,255,0.14)" transform="rotate(135,100,220)"/>
+      <ellipse cx="100" cy="198" rx="10" ry="22" fill="rgba(190,230,255,0.14)" transform="rotate(180,100,220)"/>
+      <ellipse cx="100" cy="198" rx="10" ry="22" fill="rgba(190,230,255,0.14)" transform="rotate(225,100,220)"/>
+      <ellipse cx="100" cy="198" rx="10" ry="22" fill="rgba(190,230,255,0.14)" transform="rotate(270,100,220)"/>
+      <ellipse cx="100" cy="198" rx="10" ry="22" fill="rgba(190,230,255,0.14)" transform="rotate(315,100,220)"/>
+      <ellipse cx="100" cy="205" rx="8" ry="14" fill="rgba(200,238,255,0.20)" transform="rotate(22.5,100,220)"/>
+      <ellipse cx="100" cy="205" rx="8" ry="14" fill="rgba(200,238,255,0.18)" transform="rotate(94.5,100,220)"/>
+      <ellipse cx="100" cy="205" rx="8" ry="14" fill="rgba(200,238,255,0.18)" transform="rotate(166.5,100,220)"/>
+      <ellipse cx="100" cy="205" rx="8" ry="14" fill="rgba(200,238,255,0.18)" transform="rotate(238.5,100,220)"/>
+      <ellipse cx="100" cy="205" rx="8" ry="14" fill="rgba(200,238,255,0.18)" transform="rotate(310.5,100,220)"/>
+      <ellipse cx="100" cy="211" rx="6" ry="9" fill="rgba(210,240,255,0.25)" transform="rotate(0,100,220)"/>
+      <ellipse cx="100" cy="211" rx="6" ry="9" fill="rgba(210,240,255,0.22)" transform="rotate(72,100,220)"/>
+      <ellipse cx="100" cy="211" rx="6" ry="9" fill="rgba(210,240,255,0.22)" transform="rotate(144,100,220)"/>
+      <ellipse cx="100" cy="211" rx="6" ry="9" fill="rgba(210,240,255,0.22)" transform="rotate(216,100,220)"/>
+      <ellipse cx="100" cy="211" rx="6" ry="9" fill="rgba(210,240,255,0.22)" transform="rotate(288,100,220)"/>
+      <circle cx="100" cy="220" r="7" fill="rgba(218,244,255,0.22)"/>
+      <circle cx="100" cy="220" r="3.5" fill="rgba(235,250,255,0.32)"/>
+      <ellipse cx="35" cy="234" rx="7" ry="12" fill="rgba(185,225,255,0.13)" transform="rotate(0,35,248)"/>
+      <ellipse cx="35" cy="234" rx="7" ry="12" fill="rgba(183,222,255,0.11)" transform="rotate(72,35,248)"/>
+      <ellipse cx="35" cy="234" rx="7" ry="12" fill="rgba(183,222,255,0.11)" transform="rotate(144,35,248)"/>
+      <ellipse cx="35" cy="234" rx="7" ry="12" fill="rgba(183,222,255,0.11)" transform="rotate(216,35,248)"/>
+      <ellipse cx="35" cy="234" rx="7" ry="12" fill="rgba(183,222,255,0.11)" transform="rotate(288,35,248)"/>
+      <circle cx="35" cy="248" r="4" fill="rgba(210,238,255,0.18)"/>
+    </svg>
+  </div>
+
+  <div id="app">
+
+    <!-- ════════════════════════ Nav (60px) ════════════════════════ -->
+    <nav id="main-nav" aria-label="주 메뉴">
+      <div class="nav-logo" title="Research Assistant">R</div>
+
+      <button class="nav-btn" data-tab="chat" title="Chat (Cmd+1)">
+        <span class="nav-icon">✦</span>
+        <span class="nav-label">Chat</span>
+      </button>
+      <button class="nav-btn" data-tab="wiki" title="Wiki (Cmd+2)">
+        <span class="nav-icon">◈</span>
+        <span class="nav-label">Wiki</span>
+      </button>
+      <button class="nav-btn" data-tab="projects" title="Projects (Cmd+3)">
+        <span class="nav-icon">⬡</span>
+        <span class="nav-label">Proj</span>
+      </button>
+      <button class="nav-btn" data-tab="study" title="Paper Study (Cmd+4)">
+        <span class="nav-icon">⊹</span>
+        <span class="nav-label">Study</span>
+      </button>
+      <button class="nav-btn" data-tab="digest" title="Daily Digest (Cmd+5)">
+        <span class="nav-icon">✧</span>
+        <span class="nav-label">Digest</span>
+      </button>
+
+      <div class="nav-spacer"></div>
+
+      <button class="nav-btn" id="nav-theme-toggle" title="테마 전환 (라이트/다크)">
+        <span class="nav-icon" id="theme-toggle-icon">☾</span>
+        <span class="nav-label" id="theme-toggle-label">Dark</span>
+      </button>
+
+      <button class="nav-btn" data-tab="settings" title="Settings" id="nav-settings">
+        <span class="nav-icon">⚙</span>
+        <span class="nav-label">Set</span>
+      </button>
+    </nav>
+
+    <!-- ════════════════════════ Sidebar ════════════════════════ -->
+    <aside id="sidebar" class="collapsed" aria-label="섹션 메뉴">
+
+      <!-- Sidebar: Chat -->
+      <div class="sidebar-section active" data-tab="chat" id="sidebar-chat">
+        <div class="sidebar-header">
+          <span class="sidebar-title">대화 기록</span>
+          <button id="new-chat-btn" class="btn btn-gold btn-sm" title="새 대화 (Cmd+N)">+ 새 대화</button>
+        </div>
+        <div class="sidebar-tabs" style="display:flex;gap:4px;padding:8px 12px 4px">
+          <button class="sidebar-tab btn btn-ghost btn-sm active" data-tab="conversations" style="flex:1">대화</button>
+          <button class="sidebar-tab btn btn-ghost btn-sm" data-tab="bookmarks" style="flex:1">★ 북마크</button>
+        </div>
+        <div class="sidebar-search">
+          <input id="conversation-search" type="search" placeholder="대화 검색..." autocomplete="off">
+        </div>
+        <div class="sidebar-list" id="conversation-list"></div>
+      </div>
+
+      <!-- Sidebar: Wiki -->
+      <div class="sidebar-section" data-tab="wiki" id="sidebar-wiki">
+        <div class="sidebar-header">
+          <span class="sidebar-title">Paper Wiki</span>
+          <button class="btn btn-gold btn-sm" id="wiki-add-btn" title="DOI로 추가">+ 추가</button>
+        </div>
+        <div class="sidebar-search">
+          <input id="wiki-search-input" type="search" placeholder="논문 검색..." autocomplete="off">
+        </div>
+        <div class="sidebar-list" id="wiki-tag-filters">
+          <!-- Tag filters populated by JS -->
+        </div>
+      </div>
+
+      <!-- Sidebar: Projects -->
+      <div class="sidebar-section" data-tab="projects" id="sidebar-projects">
+        <div class="sidebar-header">
+          <span class="sidebar-title">프로젝트</span>
+          <button class="btn btn-gold btn-sm" id="project-new-btn" title="새 프로젝트 (Cmd+N)">+ 새로</button>
+        </div>
+        <div class="sidebar-list" id="project-list"></div>
+      </div>
+
+      <!-- Sidebar: Study -->
+      <div class="sidebar-section" data-tab="study" id="sidebar-study">
+        <div class="sidebar-header">
+          <span class="sidebar-title">Paper Study</span>
+        </div>
+        <div class="sidebar-list" id="study-history-list">
+          <div class="sidebar-group-label">최근 분석</div>
+        </div>
+      </div>
+
+      <!-- Sidebar: Digest -->
+      <div class="sidebar-section" data-tab="digest" id="sidebar-digest">
+        <div class="sidebar-header">
+          <span class="sidebar-title">Daily Digest</span>
+          <span id="telegram-status-badge" class="telegram-status disconnected">미설정</span>
+        </div>
+        <div class="sidebar-list" id="digest-history-list">
+          <div class="sidebar-group-label">히스토리</div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ════════════════════════ Content ════════════════════════ -->
+    <main id="content">
+
+      <button class="sidebar-toggle-btn" title="사이드바 토글 (Cmd+\)">≡</button>
+
+      <!-- ─── Tab: Chat ─────────────────────────────── -->
+      <section id="tab-chat" class="tab-section">
+        <div class="content-header">
+          <div class="content-header-left">
+            <select id="project-select" title="프로젝트 선택">
+              <option value="">프로젝트 없음</option>
+            </select>
+            <div class="chat-context-info">
+              <span class="context-badge empty" id="chat-context-badge">
+                <span class="dot"></span>
+                <span>프로젝트 없음</span>
+              </span>
+            </div>
+          </div>
+          <div class="content-header-right">
+            <button id="plan-toggle" type="button" class="plan-toggle" title="안전모드: 계획만 세우고 파일 변경·실행은 하지 않습니다" aria-pressed="false">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              <span>안전모드</span>
+            </button>
+            <select id="model-select" title="모델 선택">
+              <option value="claude-opus-5" selected>Opus 5</option>
+              <option value="claude-fable-5">Fable 5</option>
+              <option value="claude-sonnet-5">Sonnet 5</option>
+              <option value="claude-haiku-4-5">Haiku 4.5</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="context-bar">
+          <div class="context-bar-inner">
+            <div class="context-bar-fill" id="context-fill"></div>
+          </div>
+          <span class="context-label" id="context-label"></span>
+        </div>
+
+        <div id="chat-messages"></div>
+
+        <div id="chat-input-area">
+          <div id="attachments-preview"></div>
+          <div id="chat-path-input-row" class="path-input-row" style="display:none;margin-bottom:6px">
+            <input id="chat-path-input" type="text" placeholder="/Users/.../paper.pdf" autocomplete="off">
+            <button id="chat-path-input-confirm" class="btn btn-primary btn-sm">첨부</button>
+            <button id="chat-path-input-cancel" class="btn btn-ghost btn-sm">취소</button>
+          </div>
+          <div id="input-row">
+            <button id="chat-attach-btn" class="attach-btn" title="파일 첨부">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+              </svg>
+            </button>
+            <button id="chat-attach-path-btn" class="attach-btn" title="경로로 첨부">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z"/>
+              </svg>
+            </button>
+            <textarea id="chat-input" rows="1" placeholder="메시지를 입력하세요... (Shift+Enter: 줄바꿈)" autofocus></textarea>
+            <button id="chat-send-btn" title="보내기 (Enter)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+            </button>
+          </div>
+          <input type="file" id="chat-attach-input" multiple style="display:none">
+        </div>
+      </section>
+
+      <!-- ─── Tab: Wiki ─────────────────────────────── -->
+      <section id="tab-wiki" class="tab-section hidden">
+        <div class="wiki-toolbar">
+          <div class="wiki-toolbar-left">
+            <h1 class="section-title">Paper Wiki</h1>
+            <div class="wiki-mode-toggle">
+              <button class="wiki-mode-btn active" id="wiki-mode-papers" title="논문 목록">📄 Papers</button>
+              <button class="wiki-mode-btn" id="wiki-mode-concepts" title="개념 문서">🧠 Concepts</button>
+            </div>
+          </div>
+          <div class="wiki-toolbar-right">
+            <div class="view-toggle" id="wiki-view-toggle">
+              <button class="view-toggle-btn active" id="wiki-view-grid" title="그리드 뷰">⊞ 그리드</button>
+              <button class="view-toggle-btn" id="wiki-view-list" title="리스트 뷰">≡ 리스트</button>
+            </div>
+            <div class="view-toggle hidden" id="concept-view-toggle">
+              <button class="view-toggle-btn active" id="concept-view-list" title="목록 보기">≡ 목록</button>
+              <button class="view-toggle-btn" id="concept-view-graph" title="개념 지도">◈ 지도</button>
+            </div>
+            <button class="btn btn-gold btn-sm" id="wiki-add-btn-2" onclick="document.getElementById('wiki-add-btn').click()">+ 추가</button>
+          </div>
+        </div>
+
+        <div class="wiki-main-content" id="wiki-papers"></div>
+        <div class="wiki-main-content hidden" id="wiki-concepts"></div>
+        <div class="wiki-main-content hidden" id="wiki-concept-graph"></div>
+
+        <!-- Slide panel for concept detail -->
+        <div class="slide-panel" id="concept-slide-panel">
+          <div class="slide-panel-header">
+            <button class="slide-panel-close" id="concept-slide-close" title="닫기">×</button>
+            <span class="uppercase-label">개념 문서</span>
+            <button class="btn btn-sm" id="concept-delete-btn" style="color:var(--error,#e05);border-color:rgba(220,50,50,0.3);background:rgba(220,50,50,0.07)">삭제</button>
+          </div>
+          <div class="slide-panel-body" id="concept-slide-body"></div>
+        </div>
+
+        <!-- Slide panel for paper detail -->
+        <div class="slide-panel" id="wiki-slide-panel">
+          <div class="slide-panel-header">
+            <button class="slide-panel-close" id="wiki-slide-close" title="닫기">×</button>
+            <span class="uppercase-label">논문 상세</span>
+            <div style="display:flex;gap:6px;align-items:center">
+              <button class="btn btn-ghost btn-sm" id="wiki-open-chat">Chat에서 열기</button>
+              <button class="btn btn-sm" id="wiki-delete-btn" style="color:var(--error,#e05);border-color:rgba(220,50,50,0.3);background:rgba(220,50,50,0.07)" title="Wiki에서 삭제">삭제</button>
+            </div>
+          </div>
+          <div class="slide-panel-body">
+            <div class="detail-title" id="detail-title"></div>
+            <div class="detail-meta" id="detail-meta"></div>
+            <div class="detail-tags" id="detail-tags"></div>
+
+            <div class="detail-tabs">
+              <div class="detail-tab active" data-detail-tab="summary">요약</div>
+              <div class="detail-tab" data-detail-tab="figures">Figures</div>
+              <div class="detail-tab" data-detail-tab="notes">노트</div>
+              <div class="detail-tab" data-detail-tab="related">연관논문</div>
+            </div>
+
+            <div class="detail-tab-content active" data-detail-tab-content="summary"></div>
+            <div class="detail-tab-content" data-detail-tab-content="figures"></div>
+            <div class="detail-tab-content" data-detail-tab-content="notes"></div>
+            <div class="detail-tab-content" data-detail-tab-content="related"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── Tab: Projects ─────────────────────────── -->
+      <section id="tab-projects" class="tab-section hidden">
+        <div class="content-body" id="project-editor-container">
+          <!-- Editor rendered by JS -->
+        </div>
+      </section>
+
+      <!-- ─── Tab: Study ───────────────────────────── -->
+      <section id="tab-study" class="tab-section hidden">
+        <div class="content-header">
+          <div class="content-header-left">
+            <h1 class="section-title">Paper Study</h1>
+          </div>
+        </div>
+        <div class="content-body">
+          <div class="study-container">
+
+            <div class="study-drop-area" id="study-drop-area">
+              <div class="drop-icon">⊹</div>
+              <div class="drop-title">PDF 파일을 드롭하거나 클릭하여 선택</div>
+              <div class="drop-subtitle">또는 아래에 절대 경로 입력</div>
+              <input type="file" id="study-file-input" accept=".pdf" style="display:none">
+              <div class="path-input-row" style="max-width:560px;margin:14px auto 0">
+                <input id="study-path-input" type="text" placeholder="/Users/.../paper.pdf" autocomplete="off">
+                <button class="btn btn-primary btn-sm" id="study-path-attach-btn">경로 첨부</button>
+              </div>
+            </div>
+
+            <div id="study-attached-wrap"></div>
+
+            <div class="study-actions">
+              <button class="btn btn-primary" id="study-analyze-btn" disabled>✦ 분석 시작</button>
+              <button class="btn btn-ghost" id="study-clear-btn">초기화</button>
+              <button class="btn btn-gold hidden" id="study-save-wiki-btn">◈ Wiki에 저장</button>
+            </div>
+
+            <div class="study-result hidden" id="study-result"></div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── Tab: Digest ──────────────────────────── -->
+      <section id="tab-digest" class="tab-section hidden">
+        <div class="content-header">
+          <div class="content-header-left">
+            <h1 class="section-title">Daily Paper Digest</h1>
+          </div>
+        </div>
+        <div class="content-body" id="digest-content">
+          <!-- Rendered by JS -->
+        </div>
+      </section>
+
+      <!-- Settings placeholder (uses modal-like full section) -->
+      <section id="tab-settings" class="tab-section hidden">
+        <div class="content-header">
+          <div class="content-header-left">
+            <h1 class="section-title">Settings</h1>
+          </div>
+        </div>
+        <div class="content-body">
+          <div class="empty-state">
+            <div class="empty-state-icon">⚙</div>
+            <div class="empty-state-title">설정</div>
+            <div class="empty-state-msg">Telegram, Obsidian vault 경로, Digest 키워드 등은 Digest 탭의 [Telegram 설정] 모달에서 변경할 수 있습니다.</div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ════════════════════════ Modals ════════════════════════ -->
+
+  <!-- 전역 검색 모달 (Cmd+K) -->
+  <div id="search-modal" class="modal-overlay hidden" style="display:none">
+    <div class="modal search-modal">
+      <div class="search-input-wrap">
+        <span class="search-input-icon">⌕</span>
+        <input id="search-input" type="text" placeholder="논문 · 개념 · 대화 검색" autocomplete="off" spellcheck="false">
+        <span class="search-input-hint">↑↓ 이동 · Enter 열기 · Esc 닫기</span>
+      </div>
+      <div id="search-results" class="search-results"></div>
+    </div>
+  </div>
+
+  <!-- DOI 입력 모달 -->
+  <div id="doi-modal" class="modal-overlay hidden" style="display:none">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>DOI로 논문 추가</h2>
+        <button class="modal-close-btn" id="doi-modal-close">×</button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted text-sm">DOI를 입력하면 PubMed/Crossref에서 메타데이터(제목, 저자, 초록 등)를 자동으로 가져옵니다.</p>
+        <input id="doi-input" type="text" class="doi-input mt-3" placeholder="10.1016/j.cell.2017.05.018" autocomplete="off">
+        <div class="doi-hint">예시: 10.1016/j.cell.2017.05.018 또는 https://doi.org/10.xxxx/xxxx</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="doi-modal-cancel">취소</button>
+        <button class="btn btn-gold" id="doi-modal-submit">추가</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wiki 저장 모달 (Paper Study에서 사용) -->
+  <div id="wiki-save-modal" class="modal-overlay hidden wiki-save-modal" style="display:none">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Wiki에 저장</h2>
+        <button class="modal-close-btn" id="wiki-save-modal-close">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="ai-extracted-notice mb-3">✦ AI 추출 — 검토 후 저장</div>
+        <div class="modal-form-row">
+          <label class="modal-form-label">제목 *</label>
+          <input id="wiki-save-title" type="text">
+        </div>
+        <div class="modal-form-row">
+          <label class="modal-form-label">DOI</label>
+          <input id="wiki-save-doi" type="text" class="mono" placeholder="10.xxxx/xxxx">
+        </div>
+        <div class="modal-form-row">
+          <label class="modal-form-label">한 줄 요약</label>
+          <textarea id="wiki-save-summary" rows="2"></textarea>
+        </div>
+        <div class="modal-form-row">
+          <label class="modal-form-label">태그 (쉼표 구분)</label>
+          <input id="wiki-save-tags" type="text" placeholder="method:scRNA-seq, cell:microglia, ...">
+        </div>
+        <div class="modal-form-row">
+          <label class="modal-form-label">LLM Analysis (전체)</label>
+          <textarea id="wiki-save-analysis" rows="8" style="font-family:'SF Mono',monospace;font-size:12px"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="wiki-save-modal-cancel">취소</button>
+        <button class="btn btn-gold" id="wiki-save-modal-submit">Wiki에 저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wiki Picker Modal (Projects 화면에서 사용) -->
+  <div id="wiki-picker-modal" class="modal-overlay hidden" style="display:none">
+    <div class="modal" style="max-width:600px">
+      <div class="modal-header">
+        <h2>Wiki에서 선택</h2>
+        <button class="modal-close-btn" id="wiki-picker-close">×</button>
+      </div>
+      <div class="modal-body" style="max-height:60vh;overflow-y:auto">
+        <p class="text-muted text-sm mb-3">프로젝트의 핵심 지식 파일로 사용할 논문을 선택하세요.</p>
+        <div id="wiki-picker-list"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="wiki-picker-cancel">취소</button>
+        <button class="btn btn-gold" id="wiki-picker-confirm">선택 항목 추가</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Telegram 설정 Modal -->
+  <div id="telegram-modal" class="modal-overlay hidden telegram-settings-modal" style="display:none">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Telegram 봇 설정</h2>
+        <button class="modal-close-btn" id="telegram-modal-close">×</button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted text-sm mb-3">BotFather에서 봇을 만들고 token을 발급받으세요. chat_id는 @userinfobot에게 메시지를 보내면 확인할 수 있습니다.</p>
+        <div class="modal-form-row">
+          <label class="modal-form-label">Bot Token</label>
+          <input id="telegram-token" type="text" class="mono" placeholder="1234567890:ABC-DEF...">
+        </div>
+        <div class="modal-form-row">
+          <label class="modal-form-label">Chat ID</label>
+          <input id="telegram-chat-id" type="text" class="mono" placeholder="123456789">
+        </div>
+        <div class="modal-form-row" style="flex-direction:row;align-items:center;gap:8px">
+          <input id="telegram-enabled" type="checkbox">
+          <label for="telegram-enabled" class="text-sm">Telegram 폴링 활성화</label>
+        </div>
+        <button class="btn btn-ghost btn-sm mt-3" id="telegram-test-btn">테스트 전송</button>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="telegram-modal-cancel">취소</button>
+        <button class="btn btn-gold" id="telegram-modal-save">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toast-container"></div>
+
+  <!-- ════════════════════════ Scripts ════════════════════════ -->
+  <script src="/static/js/home-bg.js" defer></script>
+  <script src="/static/js/utils.js" defer></script>
+  <script src="/static/js/search.js" defer></script>
+  <script src="/static/js/chat.js" defer></script>
+  <script src="/static/js/wiki.js" defer></script>
+  <script src="/static/js/projects.js" defer></script>
+  <script src="/static/js/study.js" defer></script>
+  <script src="/static/js/digest.js" defer></script>
+</body>
+</html>
