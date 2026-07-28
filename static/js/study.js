@@ -584,12 +584,57 @@ Fig1→Fig2→...→한줄결론 형태로.
       return null;
     }
 
-    async function renderPage(pd, figNum) {
+    // 캡션이 본문 페이지 하단에 있고 그림은 다음 장에 실리는 레이아웃 대응.
+    //
+    // renderPage는 "그림은 캡션 바로 위에 있다"고 가정하고 페이지 상단부터
+    // 캡션까지를 잘라낸다. Nature 계열은 전면 그림을 다음 장에 싣고 캡션만
+    // 앞 페이지 하단에 남기는 경우가 있는데, 그러면 이 가정이 깨져서 본문
+    // 텍스트만 크롭돼 나온다. 게다가 그림 페이지에는 "Fig N" 문자열이 아예
+    // 없어서(축 라벨과 유전자명뿐) 텍스트 검색 기반인 findPageForFig는 그
+    // 페이지를 후보에조차 올리지 못한다.
+    //
+    // 판별은 두 신호가 모두 성립할 때만 — 오작동 시 기존 동작으로 되돌아간다.
+    //   (1) 캡션 위쪽 글자 밀도가 높다  = 그 영역은 그림이 아니라 본문이다
+    //   (2) 인접 페이지의 글자 수가 훨씬 적다 = 그쪽이 그림 페이지다
+    const CAPTION_PAGE_TEXT_DENSITY = 4500; // 측정값: 그림 2173·2923 vs 본문 7838~8240
+    const FIGURE_PAGE_TEXT_RATIO = 0.6;     // 측정값: 그림 0.22~0.40 vs 본문 1.49·2.03
+
+    function charsAboveCaption(pd, captionCssY, cssH, pageH) {
+      let n = 0;
+      for (const it of pd.textItems || []) {
+        if (!("str" in it)) continue;
+        const y = (pageH - it.transform[5]) * BASE_SCALE;
+        // 상단 8%는 저널 러닝 헤더 — 본문 밀도 계산에서 제외
+        if (y < captionCssY && y / cssH > 0.08) n += it.str.length;
+      }
+      return n;
+    }
+
+    function resolveFigurePage(pd, figNum) {
+      if (!pd) return { pd, crop: true };
+      const pageH = pd.page.getViewport({ scale: 1 }).height;
+      const cssH = pageH * BASE_SCALE;
+      const captionCssY = findCaptionY(pd.page, figNum, BASE_SCALE, pd.textItems);
+      if (captionCssY == null) return { pd, crop: true };
+      const ratio = captionCssY / cssH;
+      const density = charsAboveCaption(pd, captionCssY, cssH, pageH) / ratio;
+      if (density <= CAPTION_PAGE_TEXT_DENSITY) return { pd, crop: true };
+      // 캡션 위가 본문 → 그림은 인접 페이지. 다음 장을 먼저, 없으면 이전 장.
+      const neighbors = [pageIndex[pd.pageNum], pageIndex[pd.pageNum - 2]];
+      for (const cand of neighbors) {
+        if (cand && cand.textLength < pd.textLength * FIGURE_PAGE_TEXT_RATIO) {
+          return { pd: cand, crop: false }; // 전면 그림이므로 자르지 않는다
+        }
+      }
+      return { pd, crop: true };
+    }
+
+    async function renderPage(pd, figNum, crop = true) {
       const dpr = window.devicePixelRatio || 1;
       const physScale = BASE_SCALE * dpr;
       const vp = pd.page.getViewport({ scale: physScale });
       const cssVp = pd.page.getViewport({ scale: BASE_SCALE });
-      const captionCssY = figNum != null ? findCaptionY(pd.page, figNum, BASE_SCALE, pd.textItems) : null;
+      const captionCssY = (crop && figNum != null) ? findCaptionY(pd.page, figNum, BASE_SCALE, pd.textItems) : null;
       const fullCanvas = document.createElement("canvas");
       fullCanvas.width = Math.round(vp.width);
       fullCanvas.height = Math.round(vp.height);
@@ -644,6 +689,14 @@ Fig1→Fig2→...→한줄결론 형태로.
       }
     }
 
+    // 캡션 페이지 → 실제 그림 페이지 보정 (페이지 라벨도 같이 맞도록 렌더 전에 수행)
+    for (const [figNum, group] of figGroups) {
+      if (!group.pd) continue;
+      const resolved = resolveFigurePage(group.pd, figNum);
+      group.pd = resolved.pd;
+      group.crop = resolved.crop;
+    }
+
     const figEntries = Array.from(figGroups.entries());
     const canvasMap = new Map();
     const totalFigs = figEntries.filter(([, g]) => g.pd).length;
@@ -651,7 +704,7 @@ Fig1→Fig2→...→한줄결론 형태로.
     let rendered = 0;
     await Promise.all(figEntries.map(async ([figNum, group]) => {
       if (group.pd) {
-        canvasMap.set(figNum, await renderPage(group.pd, figNum));
+        canvasMap.set(figNum, await renderPage(group.pd, figNum, group.crop !== false));
         rendered++;
         updateLoading(60 + Math.round((rendered / totalFigs) * 35), `렌더링 중... (${rendered}/${totalFigs})`);
       }
